@@ -128,8 +128,8 @@ export default function CatForm({ onSubmit, loading, error, hasResult, values, o
         </div>
 
         {/* Castrado toggle */}
-        <div
-          onClick={() => set('castrado', !values.castrado)}
+        <label
+          htmlFor="castrado"
           className={`flex items-center gap-3 rounded-xl px-4 py-3 border-2 cursor-pointer transition-all ${
             values.castrado ? 'bg-orange-50 border-orange-300' : 'bg-gray-50 border-gray-200 hover:border-gray-300'
           }`}
@@ -141,13 +141,13 @@ export default function CatForm({ onSubmit, loading, error, hasResult, values, o
             onClick={e => e.stopPropagation()}
           />
           <div className="flex-1">
-            <Label htmlFor="castrado" className="cursor-pointer font-semibold text-gray-800 text-sm">
+            <span className="cursor-pointer font-semibold text-gray-800 text-sm">
               Gato castrado
-            </Label>
+            </span>
             <p className="text-xs text-gray-400 mt-0.5">Influencia nas recomendações nutricionais</p>
           </div>
           <span className={`text-xl ${values.castrado ? 'opacity-100' : 'opacity-30'}`}>✂️</span>
-        </div>
+        </label>
 
         {/* Error */}
         {error && (

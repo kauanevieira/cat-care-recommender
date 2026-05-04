@@ -49,7 +49,14 @@ function byName(products, name) {
 }
 
 /**
- * Gera "compras" sintéticas para treinar o classificador binário (comprou / não comprou).
+ * Gera "compras" sintéticas para treinar o classificador binário.
+ *
+ * Regras organizadas por dimensão do perfil do gato:
+ *  - Alimentação  → depende de idade, peso e se é castrado
+ *  - Brinquedos   → depende de atividade e idade
+ *  - Higiene      → depende de ambiente e castrado
+ *  - Acessórios   → depende de ambiente, atividade e peso
+ *  - Saúde        → depende de idade, castrado e peso
  */
 export function simulatePurchases(cat, products) {
   const add = (set, name) => {
@@ -58,49 +65,112 @@ export function simulatePurchases(cat, products) {
   };
   const set = new Set();
 
+  // ── ALIMENTAÇÃO ──────────────────────────────────────────────────────────
   if (cat.idade < 1) {
+    // Filhote: precisa de ração específica + úmida para hidratação
     add(set, 'Ração úmida filhote');
-    add(set, 'Brinquedo varinha pena');
-  } else {
+  } else if (cat.castrado && cat.peso > 5.5 && cat.idade >= 1) {
+    // Castrado com sobrepeso: ração light é prioridade
+    add(set, 'Ração light castrado');
+    add(set, 'Petisco dental'); // dentes ressentes em castrados sedentários
+  } else if (cat.castrado && cat.peso > 4.5 && cat.idade >= 2) {
+    // Castrado com tendência a engordar: light + seca
+    add(set, 'Ração light castrado');
+    add(set, 'Ração seca adulto');
+  } else if (cat.idade >= 1 && cat.atividade === 'alto') {
+    // Adulto/jovem muito ativo: precisa de mais caloria — ração seca + úmida
     add(set, 'Ração seca adulto');
     add(set, 'Ração úmida adulto');
+  } else if (cat.idade >= 1 && cat.idade < 9) {
+    // Adulto padrão
+    add(set, 'Ração seca adulto');
+    if (cat.atividade === 'baixo') {
+      add(set, 'Petisco dental'); // sedentário acumula tártaro
+    } else {
+      add(set, 'Ração úmida adulto');
+    }
+  } else if (cat.idade >= 9) {
+    // Sênior: precisa de ração úmida (hidratação) + suplemento
+    add(set, 'Ração úmida adulto');
+    add(set, 'Suplemento ômega 3');
   }
 
-  if (cat.peso > 6.2 && cat.idade > 2) {
-    add(set, 'Ração light castrado');
-  }
-
-  if (cat.atividade === 'baixo') {
-    add(set, 'Bolinha com guizo');
-    add(set, 'Arranhador torre 1m');
-    add(set, 'Petisco dental');
-  }
-
+  // ── BRINQUEDOS ───────────────────────────────────────────────────────────
   if (cat.atividade === 'alto') {
+    // Muito ativo: brinquedos que estimulam caça e movimento
     add(set, 'Brinquedo varinha pena');
+    add(set, 'Snuggle catnip');
+    if (cat.idade < 3) add(set, 'Bolinha com guizo'); // filhote/jovem ativo também usa bolinha
+  } else if (cat.atividade === 'medio') {
+    // Atividade média: brinquedos moderados
+    add(set, 'Snuggle catnip');
+    if (cat.idade < 5) add(set, 'Brinquedo varinha pena');
+  } else {
+    // Sedentário: precisa de estímulo leve para não engordar
+    add(set, 'Bolinha com guizo');
     add(set, 'Snuggle catnip');
   }
 
+  // ── HIGIENE ──────────────────────────────────────────────────────────────
   if (cat.ambiente === 'apartamento') {
+    // Apartamento: areia aglomerante (compacta, sem odor) é preferida
     add(set, 'Areia aglomerante');
-    add(set, 'Arranhador parede');
+    if (cat.peso > 5.0 || cat.atividade === 'baixo') {
+      // Gatos pesados/sedentários em apartamento ficam com tapete sujo
+      add(set, 'Tapete higiênico');
+    }
+    // Shampoo a seco: gatos de apartamento não tomam banho de chuva
+    add(set, 'Shampoo a seco');
+  } else {
+    // Casa: caixa fechada evita que gatos saiam espalhando areia
+    add(set, 'Caixa de areia fechada');
+    // Casa: gato sai para área externa, pelo acumula mais
+    add(set, 'Escova removedora pelo');
+  }
+
+  // ── ACESSÓRIOS ───────────────────────────────────────────────────────────
+  if (cat.ambiente === 'apartamento') {
+    // Arranhador indispensável em apartamento (sem árvores, móveis em risco)
+    if (cat.atividade === 'alto' || cat.idade < 4) {
+      add(set, 'Arranhador torre 1m'); // gatos ativos preferem torre
+    } else {
+      add(set, 'Arranhador parede'); // sedentários aceitam o de parede
+    }
+    // Bebedouro elétrico: estimula hidratação em ambiente fechado
     add(set, 'Fonte bebedouro elétrica');
   } else {
-    add(set, 'Caixa de areia fechada');
-    add(set, 'Caminha ortopédica');
+    // Casa: arranhador torre (têm mais espaço)
+    if (cat.atividade !== 'baixo') {
+      add(set, 'Arranhador torre 1m');
+    }
+  }
+
+  if (cat.castrado && cat.peso > 5.0 && cat.idade >= 2) {
+    // Comedouro elevado: evita engolir rápido, controla peso
+    add(set, 'Comedouro elevado');
   }
 
   if (cat.idade >= 9) {
-    add(set, 'Suplemento ômega 3');
+    // Sênior: caminha ortopédica alivia articulações
     add(set, 'Caminha ortopédica');
+    // Sênior bebe menos, bebedouro elétrico incentiva
+    add(set, 'Fonte bebedouro elétrica');
   }
 
+  // ── SAÚDE ─────────────────────────────────────────────────────────────────
   if (!cat.castrado && cat.idade > 1) {
+    // Não castrado vai à rua / tem mais contato externo: precisa de antipulgas
     add(set, 'Coleira antipulgas');
   }
 
-  if (cat.castrado && cat.idade >= 1 && cat.idade < 8) {
-    add(set, 'Comedouro elevado');
+  if (cat.ambiente === 'casa' && cat.idade > 1) {
+    // Gatos de casa ficam expostos a parasitas e sujeira externa
+    add(set, 'Coleira antipulgas');
+  }
+
+  if (cat.idade >= 7 || (cat.castrado && cat.peso > 6.0)) {
+    // Maduro/sênior ou castrado pesado: suplemento ômega para articulações/pelagem
+    add(set, 'Suplemento ômega 3');
   }
 
   const arr = [...set];
