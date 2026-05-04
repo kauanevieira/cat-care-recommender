@@ -5,6 +5,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const PORT = Number(process.env.PORT) || 4000;
 export const CHROMA_URL = process.env.CHROMA_URL || 'http://localhost:8000';
+export const CHROMA_TENANT = process.env.CHROMA_TENANT || undefined;
+export const CHROMA_DATABASE = process.env.CHROMA_DATABASE || undefined;
+export const CHROMA_AUTH_TOKEN = process.env.CHROMA_AUTH_TOKEN || undefined;
 export const MODEL_DIR = process.env.MODEL_DIR || path.join(__dirname, '..', 'models', 'recommender');
 export const CONTEXT_PATH = process.env.CONTEXT_PATH || path.join(__dirname, '..', 'models', 'context.json');
 export const DATA_DIR = path.join(__dirname, '..', 'data');

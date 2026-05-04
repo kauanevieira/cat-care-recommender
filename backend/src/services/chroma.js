@@ -1,11 +1,26 @@
 import { ChromaClient } from 'chromadb';
-import { CHROMA_URL, COLLECTION_PRODUCTS, COLLECTION_PROFILES } from '../config.js';
+import {
+  CHROMA_URL,
+  CHROMA_TENANT,
+  CHROMA_DATABASE,
+  CHROMA_AUTH_TOKEN,
+  COLLECTION_PRODUCTS,
+  COLLECTION_PROFILES,
+} from '../config.js';
 
 let client;
 
 export function getChromaClient() {
   if (!client) {
-    client = new ChromaClient({ path: CHROMA_URL });
+    const options = { path: CHROMA_URL };
+
+    if (CHROMA_AUTH_TOKEN) {
+      options.auth = { provider: 'token', credentials: CHROMA_AUTH_TOKEN };
+    }
+    if (CHROMA_TENANT) options.tenant = CHROMA_TENANT;
+    if (CHROMA_DATABASE) options.database = CHROMA_DATABASE;
+
+    client = new ChromaClient(options);
   }
   return client;
 }
