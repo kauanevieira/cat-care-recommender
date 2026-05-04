@@ -97,18 +97,16 @@ export function simulatePurchases(cat, products) {
 
   // ── BRINQUEDOS ───────────────────────────────────────────────────────────
   if (cat.atividade === 'alto') {
-    // Muito ativo: brinquedos que estimulam caça e movimento
+    // Muito ativo: brinquedos físicos de caça e movimento
     add(set, 'Brinquedo varinha pena');
-    add(set, 'Snuggle catnip');
     if (cat.idade < 3) add(set, 'Bolinha com guizo'); // filhote/jovem ativo também usa bolinha
   } else if (cat.atividade === 'medio') {
-    // Atividade média: brinquedos moderados
+    // Atividade média: catnip oferece estimulação mental equilibrada
     add(set, 'Snuggle catnip');
     if (cat.idade < 5) add(set, 'Brinquedo varinha pena');
   } else {
-    // Sedentário: precisa de estímulo leve para não engordar
+    // Sedentário: bolinha com guizo — estímulo físico leve e fácil de engajar
     add(set, 'Bolinha com guizo');
-    add(set, 'Snuggle catnip');
   }
 
   // ── HIGIENE ──────────────────────────────────────────────────────────────
