@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "name": "Ração úmida filhote",
+    "category": "alimentacao",
+    "price": 42.9,
+    "color": "cinza"
+  },
+  {
+    "id": 2,
+    "name": "Ração seca adulto",
+    "category": "alimentacao",
+    "price": 189.99,
+    "color": "preto"
+  },
+  {
+    "id": 3,
+    "name": "Ração light castrado",
+    "category": "alimentacao",
+    "price": 175.5,
+    "color": "cinza"
+  },
+  {
+    "id": 4,
+    "name": "Petisco dental",
+    "category": "alimentacao",
+    "price": 24.9,
+    "color": "verde"
+  },
+  {
+    "id": 5,
+    "name": "Brinquedo varinha pena",
+    "category": "brinquedos",
+    "price": 35.0,
+    "color": "vermelho"
+  },
+  {
+    "id": 6,
+    "name": "Bolinha com guizo",
+    "category": "brinquedos",
+    "price": 18.5,
+    "color": "azul"
+  },
+  {
+    "id": 7,
+    "name": "Arranhador torre 1m",
+    "category": "acessorios",
+    "price": 299.0,
+    "color": "natural"
+  },
+  {
+    "id": 8,
+    "name": "Arranhador parede",
+    "category": "acessorios",
+    "price": 89.9,
+    "color": "bege"
+  },
+  {
+    "id": 9,
+    "name": "Fonte bebedouro elétrica",
+    "category": "acessorios",
+    "price": 159.0,
+    "color": "branco"
+  },
+  {
+    "id": 10,
+    "name": "Areia aglomerante",
+    "category": "higiene",
+    "price": 79.9,
+    "color": "cinza"
+  },
+  {
+    "id": 11,
+    "name": "Caixa de areia fechada",
+    "category": "higiene",
+    "price": 220.0,
+    "color": "preto"
+  },
+  {
+    "id": 12,
+    "name": "Tapete higiênico",
+    "category": "higiene",
+    "price": 45.0,
+    "color": "azul"
+  },
+  {
+    "id": 13,
+    "name": "Shampoo a seco",
+    "category": "higiene",
+    "price": 52.0,
+    "color": "branco"
+  },
+  {
+    "id": 14,
+    "name": "Coleira antipulgas",
+    "category": "saude",
+    "price": 68.0,
+    "color": "cinza"
+  },
+  {
+    "id": 15,
+    "name": "Suplemento ômega 3",
+    "category": "saude",
+    "price": 95.0,
+    "color": "amarelo"
+  },
+  {
+    "id": 16,
+    "name": "Caminha ortopédica",
+    "category": "acessorios",
+    "price": 189.0,
+    "color": "cinza"
+  },
+  {
+    "id": 17,
+    "name": "Comedouro elevado",
+    "category": "acessorios",
+    "price": 72.0,
+    "color": "branco"
+  },
+  {
+    "id": 18,
+    "name": "Snuggle catnip",
+    "category": "brinquedos",
+    "price": 28.0,
+    "color": "verde"
+  },
+  {
+    "id": 19,
+    "name": "Escova removedora pelo",
+    "category": "higiene",
+    "price": 44.0,
+    "color": "rosa"
+  },
+  {
+    "id": 20,
+    "name": "Ração úmida adulto",
+    "category": "alimentacao",
+    "price": 48.0,
+    "color": "laranja"
+  }
+]
