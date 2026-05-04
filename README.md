@@ -1,49 +1,101 @@
-# Sistema de recomendação de cuidados para gatos
+# Cat Care Recommender
 
-Backend **Node.js (Express)** com **TensorFlow.js (tfjs-node)**, **ChromaDB** para armazenar e consultar vetores de produtos, e frontend **React (Vite)**.
+Sistema de recomendação de cuidados e produtos para gatos, combinando uma **rede neural (TensorFlow.js)** com **busca vetorial (ChromaDB)** para gerar sugestões personalizadas com base no perfil do animal.
 
-A pasta `parte05-ecommerce-recomendations-with-tensorflow/` é apenas material de referência (não faz parte do build).
+---
 
-## Pré-requisitos
+## Visao Geral
 
-- Node.js 18+
-- Docker (para o ChromaDB)
+O sistema recebe o perfil de um gato (idade, peso, se e castrado, ambiente e nivel de atividade) e retorna:
 
-## 1. Subir o ChromaDB
+- **Produtos recomendados** — ranqueados pela rede neural treinada sobre dados simulados de compra.
+- **Dicas de cuidado** — geradas por um sistema de regras com motivos explicados.
+
+### Tecnologias
+
+| Camada | Tecnologia |
+|--------|-----------|
+| Backend | Node.js 18+ · Express |
+| Machine Learning | TensorFlow.js (`tfjs-node`) |
+| Busca vetorial | ChromaDB (via Docker) |
+| Frontend | React + Vite |
+| Testes | Vitest |
+
+---
+
+## Arquitetura
+
+```
+cats.csv + products.json
+          |
+       seed.js  ← rode uma vez antes de iniciar a API
+          |
+     encoder.js  ← converte perfis em vetores numericos
+          |
+  ┌───────┴───────┐
+  |               |
+trainer.js    ChromaDB
+(TensorFlow)  (vetores dos produtos)
+  |               |
+model.json    busca por vizinhanca
+weights.bin       |
+  |               |
+  └───────┬───────┘
+          |
+       API Express (porta 4000)
+          |
+    Frontend React (porta 5173)
+```
+
+**Fluxo de recomendacao:**
+
+1. O frontend envia o perfil do gato para `POST /cats`.
+2. A API converte o perfil em vetor e consulta o ChromaDB pelos 50 produtos mais proximos.
+3. A rede neural pontua cada produto (score de 0 a 1) e retorna os top 10.
+4. O sistema de regras (`rules.js`) acrescenta dicas de cuidado com motivo.
+5. O resultado e devolvido ao frontend.
+
+---
+
+## Pre-requisitos
+
+- [Node.js 18+](https://nodejs.org/)
+- [Docker](https://www.docker.com/) (para o ChromaDB)
+
+---
+
+## Instalacao e Execucao
+
+### 1. Subir o ChromaDB
 
 ```bash
 docker compose up -d
 ```
 
-O serviço fica em `http://localhost:8000` (padrão do `backend/src/config.js` via `CHROMA_URL`).
+O servico fica disponivel em `http://localhost:8000`.
 
-## 2. Backend — instalar, treinar e rodar
+### 2. Backend
 
 ```bash
 cd backend
 npm install
+```
+
+Treinar o modelo e popular o ChromaDB (necessario apenas uma vez):
+
+```bash
 npm run seed
 ```
 
-O `seed` lê `data/cats.csv` e `data/products.json`, gera compras simuladas, grava os vetores no ChromaDB, treina a rede (mesma arquitetura do exemplo de e-commerce) e salva o modelo em `backend/models/recommender/` e o contexto em `backend/models/context.json`.
+O seed le `data/cats.csv` e `data/products.json`, simula historico de compras, treina a rede neural e salva os artefatos em `backend/models/`.
 
-Iniciar a API (porta **4000**):
+Iniciar a API em modo de desenvolvimento (porta **4000**):
 
 ```bash
 npm run dev
 ```
 
-### Endpoints
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/health` | Health check |
-| `POST` | `/cats` | Corpo: `idade`, `peso`, `castrado`, `ambiente`, `atividade` |
-| `GET` | `/cats/:id` | Perfil do gato |
-| `GET` | `/recommendations/:id` | Produtos (ranking ML + Chroma) + cuidados com motivo |
-| `POST` | `/admin/retrain` | Roda o seed de novo (Chroma + treino) |
-
-## 3. Frontend
+### 3. Frontend
 
 ```bash
 cd frontend
@@ -51,32 +103,92 @@ npm install
 npm run dev
 ```
 
-Abre em `http://localhost:5173` com **proxy** para a API em `localhost:4000`.  
-Para apontar outra URL da API, crie `frontend/.env` com:
+Acesse em `http://localhost:5173`. O Vite ja tem proxy configurado para `localhost:4000`.
 
-```env
-VITE_API_URL=http://localhost:4000
+---
+
+## Endpoints da API
+
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `GET` | `/health` | Health check |
+| `POST` | `/cats` | Cadastra gato. Corpo: `{ idade, peso, castrado, ambiente, atividade }` |
+| `GET` | `/cats/:id` | Retorna perfil do gato |
+| `GET` | `/recommendations/:id` | Recomendacoes de produtos + dicas de cuidado |
+| `POST` | `/admin/retrain` | Re-executa o seed (ChromaDB + treino) |
+
+---
+
+## Estrutura do Projeto
+
+```
+cat-care-recommender/
+├── docker-compose.yml
+├── backend/
+│   ├── data/
+│   │   ├── cats.csv          ← perfis de gatos para treino
+│   │   └── products.json     ← catalogo de produtos
+│   ├── models/
+│   │   ├── recommender/
+│   │   │   ├── model.json    ← arquitetura da rede neural
+│   │   │   └── weights.bin   ← pesos aprendidos
+│   │   └── context.json      ← normalizacao (min/max das features)
+│   └── src/
+│       ├── index.js          ← entrada do servidor
+│       ├── config.js         ← variaveis de ambiente
+│       ├── routes/           ← definicao das rotas
+│       ├── services/
+│       │   ├── encoder.js    ← converte perfis em vetores
+│       │   ├── trainer.js    ← treina a rede neural
+│       │   └── rules.js      ← regras de cuidado
+│       ├── store/            ← estado em memoria dos gatos
+│       └── seed/
+│           └── seed.js       ← script de treino inicial
+└── frontend/
+    └── src/
+        └── pages/
+            └── CatForm.jsx
 ```
 
-## 4. Testes (backend)
+---
+
+## Testes
 
 ```bash
 cd backend
 npm test
 ```
 
-## Fluxo
+---
 
-1. **Treino:** vetores de produto são calculados e upsert no ChromaDB; o modelo aprende pares (vetor gato, vetor produto) com rótulo de “comprou / não comprou” (dados simulados no seed).  
-2. **Predição:** o perfil vira um vetor no mesmo espaço que o produto; o Chroma devolve os N vizinhos; a rede reordena por score; as **regras** acrescentam dicas com **motivo**.
+## Variaveis de Ambiente
+
+### Backend (`backend/.env`)
+
+| Variavel | Padrao | Descricao |
+|----------|--------|-----------|
+| `PORT` | `4000` | Porta da API |
+| `CHROMA_URL` | `http://localhost:8000` | URL do ChromaDB |
+| `MODEL_DIR` | `./models/recommender` | Diretorio do modelo salvo |
+
+### Frontend (`frontend/.env`)
+
+| Variavel | Padrao | Descricao |
+|----------|--------|-----------|
+| `VITE_API_URL` | `http://localhost:4000` | URL da API |
+
+---
 
 ## Dados
 
-- `backend/data/products.json` — catálogo curado (substituível/amplável).  
-- `backend/data/cats.csv` — perfis tipo Kaggle para seed (colunas: `idade`, `peso`, `castrado`, `ambiente`, `atividade`).
+- **`backend/data/cats.csv`** — perfis de gatos no estilo Kaggle (`idade`, `peso`, `castrado`, `ambiente`, `atividade`). Usados apenas no seed.
+- **`backend/data/products.json`** — catalogo curado de produtos. Substituivel ou expansivel sem precisar retreinar.
 
-## Produção
+---
 
-- Rodar ChromaDB persistido (volume já definido no `docker-compose.yml`).  
-- Definir `CHROMA_URL`, `PORT`, `MODEL_DIR` conforme o ambiente.  
-- Servir o build do frontend (`npm run build` em `frontend/`) atrás de um reverse proxy com CORS se API e UI estiverem em origens diferentes.
+## Notas de Producao
+
+- O volume do ChromaDB ja esta definido no `docker-compose.yml` para persistencia.
+- Configure `CHROMA_URL`, `PORT` e `MODEL_DIR` conforme o ambiente de deploy.
+- Gere o build do frontend com `npm run build` em `frontend/` e sirva os arquivos estaticos por um reverse proxy.
+- Configure CORS no backend se API e frontend estiverem em origens diferentes.
